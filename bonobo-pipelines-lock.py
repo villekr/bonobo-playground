@@ -10,7 +10,6 @@ import time
 def acquire_lock(lock):
     logging.info('acquire_lock: START')
     status = lock.acquire()
-    logging.info('acquire_lock: %s.' % status)
     return status
 
 @use('lock')
@@ -20,21 +19,26 @@ def release_lock(input, lock):
 
 @use('lock')
 def a(status, lock):
-    logging.info('a')
+    logging.info('a: START')
     return 42
 
 @use('lock')
 def b(id, lock):
+    # This Node's operation that MUST NOT proceed until Node 'd' has completed successfully
     logging.info('b: START')
     while lock.locked():
+        logging.info('b: unable to acquire lock')
         time.sleep(2)
-    logging.info('b: %d' % id)
+    logging.info('b: lock acquired %d' % id)
 
 def c(id):
-    logging.info('c: %d' % id)
+    logging.info('c: START')
+    logging.info('c: start long operation')
+    time.sleep(10) # fake that this node does work that takes some time
     return 'Hello'
 
 def d(name):
+    logging.info('d: START')
     logging.info('d: %s' % name)
     return name
 
